@@ -552,8 +552,8 @@ def populate_global_vars():
                 norm_csv_path = os.path.normpath(row[1])
                 norm_api_path = os.path.normpath(model['filename'])
                 if norm_csv_path.split(os.sep)[-1] == norm_api_path.split(os.sep)[-1] \
-                        or norm_csv_path.replace(os.sep, '_') == model['model_name']:
-                    global_var.model_info[row[0]] = model['title'], model['model_name'], model['hash'], row[2]
+                        or norm_csv_path.replace(os.sep, '_') == model['name']:
+                    global_var.model_info[row[0]] = model['title'], model['name'], model['hash'], row[2]
                     break
     # add "Default" if models.csv is on default, or if no model matches are found
     if not global_var.model_info:
