@@ -1,6 +1,6 @@
 # AIYA
 
-A Discord bot interface for Stable Diffusion
+A Discord bot interface for Vladmandic Stable Diffusion
 
 <img src=https://raw.githubusercontent.com/Kilvoctu/kilvoctu.github.io/master/pics/preview.png  width=50% height=50%>
 
@@ -55,8 +55,7 @@ To generate an image from text, use the /draw command and include your prompt as
 
 ## Setup requirements
 
-- Set up [AUTOMATIC1111's Stable Diffusion AI Web UI](https://github.com/AUTOMATIC1111/stable-diffusion-webui).
-  - AIYA is currently tested on commit `22bcc7be428c94e9408f589966c2040187245d81` of the Web UI.
+- Set up [Vladmandic's SD.Next]([https://github.com/AUTOMATIC1111/stable-diffusion-webui](https://github.com/vladmandic/automatic)).
 - Run the Web UI as local host with API (`COMMANDLINE_ARGS= --api`).
 - Clone this repo.
 - Create a file in your cloned repo called ".env", formatted like so:
@@ -115,5 +114,7 @@ AIYA only exists thanks to these awesome people:
 - gingivere0, for PayloadFormatter class for the original API. Without that, I'd have given up from the start. Also has a great Discord bot as a no-slash-command alternative.
   - https://github.com/gingivere0/dalebot
 - ashen-sensored, for developing a workaround for Discord removing PNG info to image uploads.
-  - https://github.com/ashen-sensored/sd_webui_stealth_pnginfo 
+  - https://github.com/ashen-sensored/sd_webui_stealth_pnginfo
+- Kilvoctu, for making the main repo
+  -https://github.com/Kilvoctu/aiyabot
 - You, for using AIYA and contributing with PRs, bug reports, feedback, and more!
