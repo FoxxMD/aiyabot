@@ -65,6 +65,14 @@ TOKEN = put your bot token here
 ```
 - Run AIYA by running launch.bat (or launch.sh for Linux)
 
+## NOTE:
+To use a Diffusers model, within models.csv you must enter the string found in System -> System info:
+![image](https://github.com/hdtv35/aiyabot/assets/116765542/237e642e-7a77-48a2-9b64-e528b3fa039a)
+
+![image](https://github.com/hdtv35/aiyabot/assets/116765542/58cd88b7-2f65-4ef8-8d5b-5df7d0226982)
+
+
+
 ## Deploy with Docker
 
 AIYA can be deployed using Docker.
