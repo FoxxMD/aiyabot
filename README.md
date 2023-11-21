@@ -1,6 +1,6 @@
 # AIYA
 
-A Discord bot interface for Vladmandic Stable Diffusion
+A Discord bot interface for Vladmandic Stable Diffusion SD.Next
 
 <img src=https://raw.githubusercontent.com/Kilvoctu/kilvoctu.github.io/master/pics/preview.png  width=50% height=50%>
 
@@ -116,6 +116,8 @@ Note the following environment variables work with the docker image:
 AIYA only exists thanks to these awesome people:
 - AUTOMATIC1111, and all the contributors to the Web UI repo.
   - https://github.com/AUTOMATIC1111/stable-diffusion-webui
+- vladmandic, and all the contributors to the SD.Next repo.
+  - https://github.com/vladmandic/automatic
 - harubaru, my entryway into Stable Diffusion (with Waifu Diffusion) and foundation for the AIYA Discord bot.
   - https://github.com/harubaru/waifu-diffusion
   - https://github.com/harubaru/discord-stable-diffusion
