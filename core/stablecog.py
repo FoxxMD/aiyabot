@@ -487,14 +487,14 @@ class StableCog(commands.Cog, name='Stable Diffusion', description='Create image
                 image = Image.open(io.BytesIO(base64.b64decode(i)))
 
                 # grab png info
-                png_payload = {
-                    "image": "data:image/png;base64," + i
-                }
-                png_response = s.post(url=f'{settings.global_var.url}/sdapi/v1/png-info', json=png_payload)
+                # png_payload = {
+                #     "image": "data:image/png;base64," + i
+                # }
+                # png_response = s.post(url=f'{settings.global_var.url}/sdapi/v1/png-info', json=png_payload)
 
                 metadata = PngImagePlugin.PngInfo()
-                metadata.add_text("parameters", png_response.json().get("info"))
-                str_parameters = png_response.json().get("info")
+                # metadata.add_text("parameters", png_response.json().get("info"))
+                # str_parameters = png_response.json().get("info")
 
                 file_path = f'{settings.global_var.dir}/{epoch_time}-{queue_object.seed}-{count}.png'
 
@@ -504,7 +504,7 @@ class StableCog(commands.Cog, name='Stable Diffusion', description='Create image
                     print(f'Saved image: {file_path}')
 
                 if batch == True:
-                    image_data = (image, file_path, str_parameters)
+                    image_data = (image, file_path, '')
                     images.append(image_data)
                     
                 settings.stats_count(1)
@@ -570,7 +570,7 @@ class StableCog(commands.Cog, name='Stable Diffusion', description='Create image
             else:
                 content = f'<@{queue_object.ctx.author.id}>, {message}'
                 filename=f'{queue_object.seed}-{count}.png'
-                file = add_metadata_to_image(image,str_parameters, filename)
+                file = add_metadata_to_image(image,'', filename)
                 queuehandler.process_post(
                     self, queuehandler.PostObject(
                         self, queue_object.ctx, content=content, file=file, embed='', view=view))
