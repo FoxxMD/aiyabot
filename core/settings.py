@@ -74,6 +74,7 @@ sampler = "Euler a"
 style = "None"
 facefix = "None"
 highres_fix = "Disabled"
+full_quality_vae = true
 clip_skip = 1
 hypernet = "None"
 hyper_multi = "0.85"
@@ -105,6 +106,7 @@ class GlobalVar:
     sampler_names = []
     style_names = {}
     facefix_models = []
+    full_quality_vae = True
     embeddings_1 = []
     embeddings_2 = []
     hyper_names = []
@@ -269,6 +271,7 @@ def generate_template(template_pop, config):
     template_pop['style'] = config['style']
     template_pop['facefix'] = config['facefix']
     template_pop['highres_fix'] = config['highres_fix']
+    template_pop['full_quality_vae'] = config['full_quality_vae']
     template_pop['clip_skip'] = config['clip_skip']
     template_pop['hypernet'] = config['hypernet']
     template_pop['hyper_multi'] = config['hyper_multi']

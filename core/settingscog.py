@@ -169,6 +169,12 @@ class SettingsCog(commands.Cog):
         autocomplete=discord.utils.basic_autocomplete(hires_autocomplete),
     )
     @option(
+        'full_quality_vae',
+        bool,
+        description='Use full quality VAE to decode samples',
+        required=False,
+    )
+    @option(
         'clip_skip',
         int,
         description='Set default CLIP skip for the channel',
@@ -219,6 +225,7 @@ class SettingsCog(commands.Cog):
                                hypernet: Optional[str] = None,
                                lora: Optional[str] = None,
                                facefix: Optional[str] = None,
+                               full_quality_vae: Optional[bool] = None,
                                highres_fix: Optional[str] = None,
                                clip_skip: Optional[int] = None,
                                strength: Optional[str] = None,
@@ -321,6 +328,11 @@ class SettingsCog(commands.Cog):
         if height is not None:
             settings.update(channel, 'height', height)
             new += f'\nHeight: ``"{height}"``'
+            set_new = True
+
+        if full_quality_vae is not None:
+            settings.update(channel, 'full_quality_vae', full_quality_vae)
+            new += f'\nFull Quality VAE: ``"{full_quality_vae}"``'
             set_new = True
 
         if guidance_scale is not None:
