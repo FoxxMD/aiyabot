@@ -514,6 +514,8 @@ def populate_global_vars():
     r4 = s.get(global_var.url + "/sdapi/v1/embeddings")
     r5 = s.get(global_var.url + "/sdapi/v1/hypernetworks")
     r6 = s.get(global_var.url + "/sdapi/v1/upscalers")
+    r7 = s.get(global_var.url + "/sdapi/v1/loras")
+    r8 = s.get(global_var.url + "/sdapi/v1/extra-networks")
     r = s.get(global_var.url + "/sdapi/v1/sd-models")
     for s1 in r1.json():
         try:
@@ -542,6 +544,13 @@ def populate_global_vars():
         global_var.hyper_names.append(s5['name'])
     for s6 in r6.json():
         global_var.upscaler_names.append(s6['name'])
+    for s7 in r7.json():
+        global_var.lora_names.append(s7['alias'])
+    for s8 in r8.json():
+        if s8['type'] == 'embedding':
+            embed_name = s8['name'].split(os.sep)[-1]
+            global_var.embeddings_1.append(embed_name)
+            global_var.embeddings_2.append(embed_name)
     if 'SwinIR_4x' in global_var.upscaler_names:
         template['upscaler_1'] = 'SwinIR_4x'
 
