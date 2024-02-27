@@ -8,3 +8,5 @@ outputs
 .idea
 venv
 venvnew
+core/MagicPrompt-SD
+.github
