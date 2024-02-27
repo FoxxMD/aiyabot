@@ -1,6 +1,6 @@
 # AIYA
 
-A Discord bot interface for Stable Diffusion
+A Discord bot interface for Vladmandic Stable Diffusion SD.Next
 
 <img src=https://raw.githubusercontent.com/Kilvoctu/kilvoctu.github.io/master/pics/preview.png  width=50% height=50%>
 
@@ -62,8 +62,7 @@ To generate a prompt from a couple of words, use the /generate command and inclu
 
 ## Setup requirements
 
-- Set up [AUTOMATIC1111's Stable Diffusion AI Web UI](https://github.com/AUTOMATIC1111/stable-diffusion-webui).
-  - AIYA is currently tested on commit `20ae71faa8ef035c31aa3a410b707d792c8203a3` of the Web UI.
+- Set up [Vladmandic's SD.Next]([https://github.com/AUTOMATIC1111/stable-diffusion-webui](https://github.com/vladmandic/automatic)).
 - Run the Web UI as local host with API (`COMMANDLINE_ARGS= --api`).
 - Clone this repo.
 - Create a file in your cloned repo called ".env", formatted like so:
@@ -72,6 +71,14 @@ To generate a prompt from a couple of words, use the /generate command and inclu
 TOKEN = put your bot token here
 ```
 - Run AIYA by running launch.bat (or launch.sh for Linux)
+
+## NOTE:
+To use a Diffusers model, within models.csv you must enter the string found in System -> System info:
+![image](https://github.com/hdtv35/aiyabot/assets/116765542/237e642e-7a77-48a2-9b64-e528b3fa039a)
+
+![image](https://github.com/hdtv35/aiyabot/assets/116765542/58cd88b7-2f65-4ef8-8d5b-5df7d0226982)
+
+
 
 ## Deploy with Docker
 
@@ -117,6 +124,8 @@ Note the following environment variables work with the docker image:
 AIYA only exists thanks to these awesome people:
 - AUTOMATIC1111, and all the contributors to the Web UI repo.
   - https://github.com/AUTOMATIC1111/stable-diffusion-webui
+- vladmandic, and all the contributors to the SD.Next repo.
+  - https://github.com/vladmandic/automatic
 - harubaru, my entryway into Stable Diffusion (with Waifu Diffusion) and foundation for the AIYA Discord bot.
   - https://github.com/harubaru/waifu-diffusion
   - https://github.com/harubaru/discord-stable-diffusion
@@ -130,3 +139,5 @@ These people played a large role in AIYA's development in some way:
 - gingivere0, for PayloadFormatter class for the original API. Without that, I'd have given up from the start. Also has a great Discord bot as a no-slash-command alternative.
   - https://github.com/gingivere0/dalebot
 - You, for using AIYA and contributing with PRs, bug reports, feedback, and more!
+- Kilvoctu, for making the main repo
+  -https://github.com/Kilvoctu/aiyabot
