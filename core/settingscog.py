@@ -1,7 +1,11 @@
 import discord
 from discord import option
 from discord.ext import commands
-from typing import Optional
+from typing import Optional, List
+
+from discord.types.role import Role
+from discord.types.user import User
+from discord.ui import select
 
 from core import settings
 
@@ -205,6 +209,24 @@ class SettingsCog(commands.Cog):
         description='Use to update global lists (models, styles, embeddings, etc.)',
         required=False,
     )
+    @option(
+        'spoiler',
+        bool,
+        description='Always mark images as spoilers',
+        required=False,
+    )
+    # @option(
+    #     'spoiler_users',
+    #     List[User],
+    #     description='Always mark images as spoilers from these users',
+    #     required=False,
+    # )
+    # @option(
+    #     'spoiler_roles',
+    #     List[Role],
+    #     description='Always mark images as spoilers from these roles',
+    #     required=False,
+    # )
     async def settings_handler(self, ctx,
                                current_settings: Optional[bool] = True,
                                n_prompt: Optional[str] = None,
@@ -225,7 +247,11 @@ class SettingsCog(commands.Cog):
                                batch: Optional[str] = None,
                                max_batch: Optional[str] = None,
                                upscaler_1: Optional[str] = None,
-                               refresh: Optional[bool] = False):
+                               refresh: Optional[bool] = False,
+                               spoiler: Optional[bool] = None,
+                               # spoiler_users: Optional[List[User]] = None,
+                               # spoiler_roles: Optional[List[Role]] = None
+                               ):
         # get the channel id and check if a settings file exists
         channel = '% s' % ctx.channel.id
         settings.check(channel)
@@ -419,6 +445,19 @@ class SettingsCog(commands.Cog):
             embed.add_field(name=f'New defaults', value=new, inline=False)
         if new_n_prompt:
             embed.add_field(name=f'New default negative prompt', value=f'``{new_n_prompt}``', inline=False)
+
+        if spoiler is not None:
+            settings.update(channel, 'spoiler', spoiler)
+        # if spoiler_users is not None:
+        #     users = []
+        #     for user in spoiler_users:
+        #         users.append(user.id)
+        #     settings.update(channel, 'spoiler_roles', users)
+        # if spoiler_roles is not None:
+        #     roles = []
+        #     for role in spoiler_roles:
+        #         roles.append(role.id)
+        #     settings.update(channel, 'spoiler_roles', roles)
 
         await ctx.send_response(embed=embed, ephemeral=True)
 

@@ -158,6 +158,12 @@ class StableCog(commands.Cog, name='Stable Diffusion', description='Create image
         description='The number of images to generate. Batch format: count,size',
         required=False,
     )
+    @option(
+        'spoiler',
+        bool,
+        description='Mark generated image as spoiler?',
+        required=False,
+    )
     async def dream_handler(self, ctx: discord.ApplicationContext, *,
                             prompt: str, negative_prompt: str = None,
                             data_model: Optional[str] = None,
@@ -175,7 +181,8 @@ class StableCog(commands.Cog, name='Stable Diffusion', description='Create image
                             strength: Optional[str] = None,
                             init_image: Optional[discord.Attachment] = None,
                             init_url: Optional[str],
-                            batch: Optional[str] = None):
+                            batch: Optional[str] = None,
+                            spoiler: Optional[bool] = None):
 
         # update defaults with any new defaults from settingscog
         channel = '% s' % ctx.channel.id
@@ -206,6 +213,20 @@ class StableCog(commands.Cog, name='Stable Diffusion', description='Create image
             strength = settings.read(channel)['strength']
         if batch is None:
             batch = settings.read(channel)['batch']
+        if spoiler is None:
+            spoiler = settings.read(channel)['spoiler']
+
+        derived_spoiler = spoiler
+        if not derived_spoiler:
+            spoiler_users = settings.read(channel)['spoiler_users']
+            if ctx.author.id in spoiler_users:
+                derived_spoiler = True
+            if not derived_spoiler:
+                spoiler_roles = settings.read(channel)['spoiler_roles']
+                for role in ctx.author.roles:
+                    if str(role.id) in spoiler_roles:
+                        derived_spoiler = True
+                        break
 
         # if a model is not selected, do nothing
         model_name = 'Default'
@@ -243,9 +264,9 @@ class StableCog(commands.Cog, name='Stable Diffusion', description='Create image
         prompt = settings.extra_net_defaults(prompt, channel)
 
         if data_model != '':
-            print(f'Request -- {ctx.author.name}#{ctx.author.discriminator} -- Prompt: {prompt}')
+            print(f'Request -- {ctx.author.name}#{ctx.author.discriminator} -- Prompt: {prompt} -- Spoiler: {derived_spoiler}')
         else:
-            print(f'Request -- {ctx.author.name}#{ctx.author.discriminator} -- Prompt: {prompt} -- Using model: {data_model}')
+            print(f'Request -- {ctx.author.name}#{ctx.author.discriminator} -- Prompt: {prompt} -- Using model: {data_model} -- Spoiler: {derived_spoiler}')
 
         if seed == -1:
             seed = random.randint(0, 0xFFFFFFFF)
@@ -334,13 +355,13 @@ class StableCog(commands.Cog, name='Stable Diffusion', description='Create image
 
         if full_quality_vae != settings.read(channel)['full_quality_vae']:
             reply_adds += f'\nUse VAE: ``{full_quality_vae}``'
-            
+
         epoch_time = int(time.time())
 
         # set up tuple of parameters to pass into the Discord view
         input_tuple = (
             ctx, simple_prompt, prompt, negative_prompt, data_model, steps, width, height, guidance_scale, sampler, seed, strength,
-            init_image, batch, styles, facefix, highres_fix, full_quality_vae, clip_skip, extra_net, epoch_time)
+            init_image, batch, styles, facefix, highres_fix, full_quality_vae, clip_skip, extra_net, derived_spoiler, epoch_time)
         
         view = viewhandler.DrawView(input_tuple)
         # setup the queue
@@ -567,6 +588,8 @@ class StableCog(commands.Cog, name='Stable Diffusion', description='Create image
                         id_start = current_grid * grid_count + 1
                         id_end = id_start + last_grid_count - 1
                     filename=f'{queue_object.seed}-{current_grid}.png'
+                    if queue_object.spoiler:
+                        filename=f'SPOILER_{queue_object.seed}-{count}.png'
                     file = add_metadata_to_image(grid,images[current_grid * 25][2], filename)
                     if current_grid == 0:
                         content = f'<@{queue_object.ctx.author.id}>, {message}\n Batch ID: {epoch_time}-{queue_object.seed}\n Image IDs: {id_start}-{id_end}'
@@ -583,6 +606,8 @@ class StableCog(commands.Cog, name='Stable Diffusion', description='Create image
             else:
                 content = f'<@{queue_object.ctx.author.id}>, {message}'
                 filename=f'{queue_object.seed}-{count}.png'
+                if queue_object.spoiler:
+                    filename=f'SPOILER_{queue_object.seed}-{count}.png'
                 file = add_metadata_to_image(image,'', filename)
                 queuehandler.process_post(
                     self, queuehandler.PostObject(
