@@ -1,11 +1,7 @@
 import discord
 from discord import option
 from discord.ext import commands
-from typing import Optional, List
-
-from discord.types.role import Role
-from discord.types.user import User
-from discord.ui import select
+from typing import Optional, List, Union
 
 from core import settings
 
@@ -212,21 +208,21 @@ class SettingsCog(commands.Cog):
     @option(
         'spoiler',
         bool,
-        description='Always mark images as spoilers',
+        description='Mark images as spoilers (when not specified in /draw)',
         required=False,
     )
-    # @option(
-    #     'spoiler_users',
-    #     List[User],
-    #     description='Always mark images as spoilers from these users',
-    #     required=False,
-    # )
-    # @option(
-    #     'spoiler_roles',
-    #     List[Role],
-    #     description='Always mark images as spoilers from these roles',
-    #     required=False,
-    # )
+    @option(
+        'spoiler_role',
+        discord.Role,
+        description='Force images from users in this role as spoilers',
+        required=False,
+    )
+    @option(
+        'remove_spoiler_role',
+        bool,
+        description='Remove assigned spoiler role',
+        required=False,
+    )
     async def settings_handler(self, ctx,
                                current_settings: Optional[bool] = True,
                                n_prompt: Optional[str] = None,
@@ -249,8 +245,8 @@ class SettingsCog(commands.Cog):
                                upscaler_1: Optional[str] = None,
                                refresh: Optional[bool] = False,
                                spoiler: Optional[bool] = None,
-                               # spoiler_users: Optional[List[User]] = None,
-                               # spoiler_roles: Optional[List[Role]] = None
+                               spoiler_role: Optional[discord.Role] = None,
+                               remove_spoiler_role: Optional[bool] = None
                                ):
         # get the channel id and check if a settings file exists
         channel = '% s' % ctx.channel.id
@@ -269,6 +265,8 @@ class SettingsCog(commands.Cog):
             for key, value in cur_set.items():
                 if key == 'negative_prompt':
                     pass
+                elif key == 'spoiler_role' and value is not None:
+                    current += f'\n{key} - <@&{value}>'
                 else:
                     if value == '':
                         value = ' '
@@ -441,23 +439,23 @@ class SettingsCog(commands.Cog):
                 new += f'\nbatch (count,size): ``{batch[0]},{batch[1]}``'
             set_new = True
 
+        if spoiler is not None:
+            settings.update(channel, 'spoiler', spoiler)
+            new += f'\nDefault Spoiler: ``{spoiler}``'
+            set_new = True
+        if remove_spoiler_role is not None and remove_spoiler_role:
+            settings.update(channel, 'spoiler_role', None)
+            new += '\nRemoved Spoiler Role'
+            set_new = True
+        elif spoiler_role is not None:
+            settings.update(channel, 'spoiler_role', str(spoiler_role.id))
+            new += f'\n Spoiler Role: <@&{spoiler_role.id}>'
+            set_new = True
+
         if set_new:
             embed.add_field(name=f'New defaults', value=new, inline=False)
         if new_n_prompt:
             embed.add_field(name=f'New default negative prompt', value=f'``{new_n_prompt}``', inline=False)
-
-        if spoiler is not None:
-            settings.update(channel, 'spoiler', spoiler)
-        # if spoiler_users is not None:
-        #     users = []
-        #     for user in spoiler_users:
-        #         users.append(user.id)
-        #     settings.update(channel, 'spoiler_roles', users)
-        # if spoiler_roles is not None:
-        #     roles = []
-        #     for role in spoiler_roles:
-        #         roles.append(role.id)
-        #     settings.update(channel, 'spoiler_roles', roles)
 
         await ctx.send_response(embed=embed, ephemeral=True)
 

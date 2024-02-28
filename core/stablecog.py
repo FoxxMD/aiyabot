@@ -217,16 +217,12 @@ class StableCog(commands.Cog, name='Stable Diffusion', description='Create image
             spoiler = settings.read(channel)['spoiler']
 
         derived_spoiler = spoiler
-        if not derived_spoiler:
-            spoiler_users = settings.read(channel)['spoiler_users']
-            if ctx.author.id in spoiler_users:
-                derived_spoiler = True
-            if not derived_spoiler:
-                spoiler_roles = settings.read(channel)['spoiler_roles']
-                for role in ctx.author.roles:
-                    if str(role.id) in spoiler_roles:
-                        derived_spoiler = True
-                        break
+        spoiler_role = settings.read(channel)['spoiler_role']
+        if not derived_spoiler and spoiler_role is not None:
+            for role in ctx.author.roles:
+                if str(role.id) == spoiler_role:
+                    derived_spoiler = True
+                    break
 
         # if a model is not selected, do nothing
         model_name = 'Default'
@@ -355,6 +351,10 @@ class StableCog(commands.Cog, name='Stable Diffusion', description='Create image
 
         if full_quality_vae != settings.read(channel)['full_quality_vae']:
             reply_adds += f'\nUse VAE: ``{full_quality_vae}``'
+
+        if derived_spoiler or derived_spoiler != settings.read(channel)['spoiler']:
+            bool_emoji = ':white_check_mark:' if derived_spoiler else ':negative_squared_cross_mark:'
+            reply_adds += f'\nSpoiler: {bool_emoji}'
 
         epoch_time = int(time.time())
 

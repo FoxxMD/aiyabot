@@ -84,10 +84,8 @@ batch = "1,1"
 max_batch = "1,1"
 upscaler_1 = "ESRGAN_4x"
 spoiler = false
-# list of user IDS (not names)
-spoiler_users = []
-# list of role IDS (not names)
-spoiler_roles = []
+# role ID (not names)
+spoiler_role = ""
 """
 
 
@@ -128,8 +126,7 @@ class GlobalVar:
     display_ignored_words = "False"
     negative_prompt_prefix = []
     spoiler = False
-    spoiler_users = []
-    spoiler_roles = []
+    spoiler_role = None
 
 
 global_var = GlobalVar()
@@ -288,8 +285,7 @@ def generate_template(template_pop, config):
     template_pop['max_batch'] = config['max_batch']
     template_pop['upscaler_1'] = config['upscaler_1']
     template_pop['spoiler'] = config['spoiler']
-    template_pop['spoiler_users'] = config['spoiler_users']
-    template_pop['spoiler_roles'] = config['spoiler_roles']
+    template_pop['spoiler_role'] = config['spoiler_role']
     return template_pop
 
 
@@ -314,8 +310,11 @@ def read(channel_id):
             with open(path + channel_id + '.json', 'w') as configfile2:
                 json.dump(settings, configfile2, indent=1)
 
-        settings['spoiler_users'] = list(map(str, settings['spoiler_users']))
-        settings['spoiler_roles'] = list(map(str, settings['spoiler_roles']))
+        if settings['spoiler_role'] is not None:
+            if str(settings['spoiler_role']).strip() == '':
+                settings['spoiler_role'] = None
+            else:
+                settings['spoiler_role'] = str(settings['spoiler_role'])
 
     return settings
 
