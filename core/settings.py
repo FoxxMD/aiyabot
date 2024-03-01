@@ -59,6 +59,8 @@ prompt_ignore_list = []
 display_ignored_words = "False"
 # These words will be added to the beginning of the negative prompt
 negative_prompt_prefix = []
+# the time, in seconds, between when AIYA checks for generation progress from SD -- can be a float
+preview_update_interval = 3
 
 
 # the fallback channel defaults template for AIYA if nothing is set
@@ -127,6 +129,7 @@ class GlobalVar:
     negative_prompt_prefix = []
     spoiler = False
     spoiler_role = None
+    preview_update_interval = 3
 
 
 global_var = GlobalVar()
@@ -514,6 +517,8 @@ def populate_global_vars():
     if len(global_var.size_range) > 25:
         global_var.size_range_exceed = [x for x in global_var.size_range]
         global_var.size_range = []
+    if config['preview_update_interval'] is not None:
+        global_var.preview_update_interval = float(config['preview_update_interval'])
 
     # create persistent session since we'll need to do a few API calls
     s = authenticate_user()
