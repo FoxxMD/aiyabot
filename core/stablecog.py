@@ -19,18 +19,36 @@ from core import settings
 from core import settingscog
 from threading import Thread
 
-async def update_progress(event_loop, status_message_task, s, queue_object, tries):
+async def update_progress(event_loop, status_message_task, s, queue_object, tries, any_job, tries_since_no_job):
     status_message = status_message_task.result()
     try:
         progress_data = s.get(url=f'{settings.global_var.url}/sdapi/v1/progress').json()
+        job_name = progress_data.get('state').get('job')
+        if job_name != '':
+            any_job = True
 
-        if progress_data["current_image"] is None and tries <= 10:
-            time.sleep(1)
-            event_loop.create_task(update_progress(event_loop, status_message_task, s, queue_object, tries + 1))
-            return
-
-        if progress_data["current_image"] is None and tries > 10:
-            return
+        if progress_data["current_image"] is None:
+            if job_name == '':
+                if any_job:
+                    if tries_since_no_job >= 2:
+                        return
+                    time.sleep(3)
+                    event_loop.create_task(
+                        update_progress(event_loop, status_message_task, s, queue_object, tries + 1, any_job, tries_since_no_job + 1))
+                    return
+                else:
+                    # escape hatch
+                    if tries > 10:
+                        return
+                    time.sleep(3)
+                    event_loop.create_task(
+                        update_progress(event_loop, status_message_task, s, queue_object, tries + 1, any_job, tries_since_no_job))
+                    return
+            else:
+                time.sleep(3)
+                event_loop.create_task(
+                    update_progress(event_loop, status_message_task, s, queue_object, tries + 1, any_job, 0))
+                return
 
         image = Image.open(io.BytesIO(base64.b64decode(progress_data["current_image"])))
 
@@ -38,9 +56,15 @@ async def update_progress(event_loop, status_message_task, s, queue_object, trie
             buffer = stack.enter_context(io.BytesIO())
             image.save(buffer, 'PNG')
             buffer.seek(0)
-            file = discord.File(fp=buffer, filename=f'{queue_object.seed}.png')
-
-        ips = round((int(queue_object.steps) - progress_data["state"]["sampling_step"]) / progress_data["eta_relative"], 2)
+            filename = f'{queue_object.seed}.png'
+            if queue_object.spoiler:
+                filename = f'SPOILER_{queue_object.seed}.png'
+            fp = buffer
+            file = discord.File(fp, filename)
+        ips = '?'
+        if progress_data["eta_relative"] != 0:
+            ips = round(
+                (int(queue_object.steps) - progress_data["state"]["sampling_step"]) / progress_data["eta_relative"], 2)
 
         view = viewhandler.ProgressView()
 
@@ -55,7 +79,9 @@ async def update_progress(event_loop, status_message_task, s, queue_object, trie
         print('Something goes wrong...', str(e))
 
     time.sleep(1)
-    event_loop.create_task(update_progress(event_loop, status_message_task, s, queue_object, tries))
+
+    event_loop.create_task(
+        update_progress(event_loop, status_message_task, s, queue_object, tries + 1, any_job, 0))
 
 class StableCog(commands.Cog, name='Stable Diffusion', description='Create images from natural language.'):
     ctx_parse = discord.ApplicationContext
@@ -402,7 +428,7 @@ class StableCog(commands.Cog, name='Stable Diffusion', description='Create image
         input_tuple = (
             ctx, simple_prompt, prompt, negative_prompt, data_model, steps, width, height, guidance_scale, sampler, seed, strength,
             init_image, batch, styles, facefix, highres_fix, full_quality_vae, clip_skip, extra_net, derived_spoiler, epoch_time)
-        
+
         view = viewhandler.DrawView(input_tuple)
         # setup the queue
         user_queue_limit = settings.queue_check(ctx.author)
@@ -440,7 +466,7 @@ class StableCog(commands.Cog, name='Stable Diffusion', description='Create image
                 f'\n**Relative ETA**: initialization...'))
 
             def worker():
-                event_loop.create_task(update_progress(event_loop, status_message_task, s, queue_object, 0))
+                event_loop.create_task(update_progress(event_loop, status_message_task, s, queue_object, 0, False, 0))
                 return
 
             status_thread = threading.Thread(target=worker)
@@ -563,11 +589,11 @@ class StableCog(commands.Cog, name='Stable Diffusion', description='Create image
                 for i in range(num_grids):
                     if i == num_grids:
                         continue
-                    
+
                     if i < num_grids - 1 or last_grid_count == 0:
                         width = grid_cols * queue_object.width
                         height = grid_rows * queue_object.height
-                    else: 
+                    else:
                         width = last_grid_cols * queue_object.width
                         height = last_grid_rows * queue_object.height
                     image = Image.new('RGB', (width, height))
@@ -597,7 +623,7 @@ class StableCog(commands.Cog, name='Stable Diffusion', description='Create image
                 if batch == True:
                     image_data = (image, file_path, '')
                     images.append(image_data)
-                    
+
                 settings.stats_count(1)
 
                 # increment seed for view when using batch
@@ -639,7 +665,7 @@ class StableCog(commands.Cog, name='Stable Diffusion', description='Create image
                     grids[current_grid].paste(grid_image[0], (grid_x, grid_y))
                     grid_index += 1
 
-                
+
                 current_grid = 0
                 for grid in grids:
                     if current_grid < num_grids -1 or last_grid_count == 0:
@@ -657,13 +683,13 @@ class StableCog(commands.Cog, name='Stable Diffusion', description='Create image
                     else:
                         content = f'> for {queue_object.ctx.author.name}, use /info or context menu to retrieve.\n Batch ID: {epoch_time}-{queue_object.seed}\n Image IDs: {id_start}-{id_end}'
                         view = None
-                        
+
                     current_grid += 1
                     # post discord message
                     queuehandler.process_post(
                         self, queuehandler.PostObject(
                             self, queue_object.ctx, content=content, file=file, embed='', view=view))
-            
+
             else:
                 content = f'<@{queue_object.ctx.author.id}>, {message}'
                 filename=f'{queue_object.seed}-{count}.png'
