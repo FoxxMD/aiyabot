@@ -26,9 +26,9 @@ async def update_progress(event_loop, status_message_task, s, queue_object, trie
     try:
         progress_data = s.get(url=f'{settings.global_var.url}/sdapi/v1/progress').json()
         job_name = progress_data.get('state').get('job')
+        has_last_file = last_file is not None
         if debug_progress:
             step = progress_data.get("state").get("sampling_step")
-            has_last_file = last_file is not None
             print(f'Job: {job_name} | Step: {step} | Tries: {tries} | Any Job: {any_job} | Tries Since No Job: {tries_since_no_progress} | Last File: {has_last_file}')
 
         if job_name != '':
@@ -83,7 +83,8 @@ async def update_progress(event_loop, status_message_task, s, queue_object, trie
         elif last_file is not None:
             if debug_progress:
                 print('updating progress => No preview image in progress data, but had last_file')
-            file = discord.File(last_file['buffer'], last_file['buffer'])
+            last_file['buffer'].seek(0)
+            file = discord.File(last_file['buffer'], last_file['name'])
         elif debug_progress:
             print('updating progress => No preview or last_image')
 
